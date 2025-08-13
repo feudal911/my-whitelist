@@ -183,6 +183,26 @@
                             class="w-full px-4 py-3 border-2 border-red-200 rounded-xl focus:border-red-500 focus:outline-none transition-colors text-gray-700"
                         >
                     </div>
+                    
+                    <div>
+                        <label class="block text-red-600 font-semibold mb-3 text-lg">
+                            Categoria *
+                        </label>
+                        <select 
+                            id="itemCategory" 
+                            required
+                            class="w-full px-4 py-3 border-2 border-red-200 rounded-xl focus:border-red-500 focus:outline-none transition-colors text-gray-700"
+                        >
+                            <option value="">Selecione uma categoria</option>
+                            <option value="eletronicos">🎮 Eletrônicos</option>
+                            <option value="roupas">👕 Roupas</option>
+                            <option value="livros">📚 Livros</option>
+                            <option value="casa">🏠 Casa</option>
+                            <option value="esportes">⚽ Esportes</option>
+                            <option value="beleza">💄 Beleza</option>
+                            <option value="outros">🎁 Outros</option>
+                        </select>
+                    </div>
                 </div>
                 
                 <div class="text-center">
@@ -212,6 +232,80 @@
                     <div class="text-3xl font-bold text-red-600" id="completedItems">0</div>
                     <div class="text-gray-600">Itens Comprados</div>
                 </div>
+            </div>
+        </div>
+
+        <!-- Filtros e Busca -->
+        <div class="bg-white rounded-3xl shadow-lg p-6 mb-8 border border-red-100">
+            <h3 class="text-2xl font-bold text-red-600 mb-6 text-center">
+                🔍 Filtros e Busca
+            </h3>
+            
+            <div class="grid md:grid-cols-3 gap-6">
+                <!-- Busca por texto -->
+                <div>
+                    <label class="block text-red-600 font-semibold mb-3">
+                        Buscar por nome
+                    </label>
+                    <input 
+                        type="text" 
+                        id="searchInput" 
+                        placeholder="Digite para buscar..."
+                        class="w-full px-4 py-3 border-2 border-red-200 rounded-xl focus:border-red-500 focus:outline-none transition-colors text-gray-700"
+                    >
+                </div>
+                
+                <!-- Filtro por categoria -->
+                <div>
+                    <label class="block text-red-600 font-semibold mb-3">
+                        Filtrar por categoria
+                    </label>
+                    <select 
+                        id="categoryFilter" 
+                        class="w-full px-4 py-3 border-2 border-red-200 rounded-xl focus:border-red-500 focus:outline-none transition-colors text-gray-700"
+                    >
+                        <option value="">Todas as categorias</option>
+                        <option value="eletronicos">🎮 Eletrônicos</option>
+                        <option value="roupas">👕 Roupas</option>
+                        <option value="livros">📚 Livros</option>
+                        <option value="casa">🏠 Casa</option>
+                        <option value="esportes">⚽ Esportes</option>
+                        <option value="beleza">💄 Beleza</option>
+                        <option value="outros">🎁 Outros</option>
+                    </select>
+                </div>
+                
+                <!-- Filtro por status -->
+                <div>
+                    <label class="block text-red-600 font-semibold mb-3">
+                        Filtrar por status
+                    </label>
+                    <select 
+                        id="statusFilter" 
+                        class="w-full px-4 py-3 border-2 border-red-200 rounded-xl focus:border-red-500 focus:outline-none transition-colors text-gray-700"
+                    >
+                        <option value="">Todos os itens</option>
+                        <option value="available">🛒 Disponível</option>
+                        <option value="completed">✅ Comprado</option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- Botões de ação -->
+            <div class="flex justify-center mt-6 space-x-4">
+                <button 
+                    onclick="applyFilters()" 
+                    class="gradient-bg text-white px-8 py-3 rounded-xl font-semibold hover:scale-105 transition-transform duration-200 shadow-lg"
+                >
+                    🔍 Aplicar Filtros
+                </button>
+                
+                <button 
+                    onclick="clearFilters()" 
+                    class="bg-gray-500 text-white px-8 py-3 rounded-xl font-semibold hover:bg-gray-600 transition-colors shadow-lg"
+                >
+                    🗑️ Limpar Filtros
+                </button>
             </div>
         </div>
 
@@ -321,6 +415,7 @@
                         price: item.price || null,
                         image_url: item.image || null,
                         buy_link: item.link || null,
+                        category: item.category || null,
                         completed: false
                     }])
                     .select();
@@ -378,6 +473,7 @@
                     price: item.price,
                     image: item.image_url,
                     link: item.buy_link,
+                    category: item.category || 'outros',
                     completed: item.completed,
                     dateAdded: item.created_at
                 }));
@@ -431,6 +527,13 @@
                     <h3 class="text-xl font-bold text-red-600 mb-3 ${item.completed ? 'line-through' : ''}">
                         ${item.title}
                     </h3>
+                    
+                    <!-- Categoria -->
+                    <div class="mb-3">
+                        <span class="inline-block bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-semibold">
+                            ${getCategoryIcon(item.category)} ${getCategoryName(item.category)}
+                        </span>
+                    </div>
                     
                     ${item.description ? `<p class="text-gray-600 mb-3 line-clamp-2">${item.description}</p>` : ''}
                     
@@ -591,6 +694,141 @@
             document.getElementById('totalValue').textContent = `R$ ${totalValue.toFixed(2).replace('.', ',')}`;
         }
 
+        // Funções auxiliares para categorias
+        function getCategoryIcon(category) {
+            const icons = {
+                'eletronicos': '🎮',
+                'roupas': '👕',
+                'livros': '📚',
+                'casa': '🏠',
+                'esportes': '⚽',
+                'beleza': '💄',
+                'outros': '🎁'
+            };
+            return icons[category] || '🎁';
+        }
+
+        function getCategoryName(category) {
+            const names = {
+                'eletronicos': 'Eletrônicos',
+                'roupas': 'Roupas',
+                'livros': 'Livros',
+                'casa': 'Casa',
+                'esportes': 'Esportes',
+                'beleza': 'Beleza',
+                'outros': 'Outros'
+            };
+            return names[category] || 'Outros';
+        }
+
+        // Funções de filtro
+        function applyFilters() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const categoryFilter = document.getElementById('categoryFilter').value;
+            const statusFilter = document.getElementById('statusFilter').value;
+            
+            let filteredItems = wishlistItems.filter(item => {
+                // Filtro por texto
+                const matchesSearch = !searchTerm || 
+                    item.title.toLowerCase().includes(searchTerm) ||
+                    (item.description && item.description.toLowerCase().includes(searchTerm));
+                
+                // Filtro por categoria
+                const matchesCategory = !categoryFilter || item.category === categoryFilter;
+                
+                // Filtro por status
+                const matchesStatus = !statusFilter || 
+                    (statusFilter === 'available' && !item.completed) ||
+                    (statusFilter === 'completed' && item.completed);
+                
+                return matchesSearch && matchesCategory && matchesStatus;
+            });
+            
+            renderFilteredItems(filteredItems);
+        }
+
+        function renderFilteredItems(filteredItems) {
+            const grid = document.getElementById('wishlistGrid');
+            const emptyState = document.getElementById('emptyState');
+            
+            if (filteredItems.length === 0) {
+                grid.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+                emptyState.innerHTML = `
+                    <div class="text-8xl mb-6">🔍</div>
+                    <h3 class="text-3xl font-bold text-red-600 mb-4">
+                        Nenhum item encontrado
+                    </h3>
+                    <p class="text-xl text-gray-600">
+                        Tente ajustar os filtros ou adicionar novos itens!
+                    </p>
+                `;
+                return;
+            }
+            
+            grid.classList.remove('hidden');
+            emptyState.classList.add('hidden');
+            
+            grid.innerHTML = filteredItems.map((item, index) => `
+                <div class="bg-white rounded-3xl shadow-lg p-6 border border-red-100 card-hover fade-in ${item.completed ? 'opacity-60' : ''}">
+                    ${item.image ? 
+                        `<img src="${item.image}" alt="${item.title}" class="w-full h-48 object-cover rounded-2xl mb-4 border-2 border-red-100" onerror="this.style.display='none'">` : 
+                        `<div class="w-full h-48 bg-red-50 rounded-2xl mb-4 flex items-center justify-center border-2 border-red-100">
+                            <svg class="w-16 h-16 text-red-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                        </div>`
+                    }
+                    
+                    <h3 class="text-xl font-bold text-red-600 mb-3 ${item.completed ? 'line-through' : ''}">
+                        ${item.title}
+                    </h3>
+                    
+                    <!-- Categoria -->
+                    <div class="mb-3">
+                        <span class="inline-block bg-red-100 text-red-800 px-3 py-1 rounded-2xl text-sm font-semibold">
+                            ${getCategoryIcon(item.category)} ${getCategoryName(item.category)}
+                        </span>
+                    </div>
+                    
+                    ${item.description ? `<p class="text-gray-600 mb-3 line-clamp-2">${item.description}</p>` : ''}
+                    
+                    ${item.price ? `<p class="text-lg font-bold text-red-600 mb-4">${item.price}</p>` : ''}
+                    
+                    <div class="flex space-x-3">
+                        <button 
+                            onclick="viewItem(${index})" 
+                            class="flex-1 gradient-bg text-white py-3 px-4 rounded-xl font-semibold hover:scale-105 transition-transform duration-200"
+                        >
+                            👁️ Ver Detalhes
+                        </button>
+                        
+                        <button 
+                            onclick="removeItem(${index})" 
+                            class="bg-red-500 text-white py-3 px-4 rounded-xl font-semibold hover:bg-red-600 transition-colors"
+                        >
+                            🗑️
+                        </button>
+                    </div>
+                    
+                    ${item.completed ? 
+                        `<div class="mt-4 text-center">
+                            <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold">
+                                ✅ Comprado
+                            </span>
+                        </div>` : ''
+                    }
+                </div>
+            `).join('');
+        }
+
+        function clearFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('categoryFilter').value = '';
+            document.getElementById('statusFilter').value = '';
+            renderWishlist();
+        }
+
         // Event listener para o formulário
         document.getElementById('addItemForm').addEventListener('submit', function(e) {
             e.preventDefault();
@@ -600,12 +838,15 @@
                 description: document.getElementById('itemDescription').value.trim(),
                 price: document.getElementById('itemPrice').value.trim(),
                 image: document.getElementById('itemImage').value.trim(),
-                link: document.getElementById('itemLink').value.trim()
+                link: document.getElementById('itemLink').value.trim(),
+                category: document.getElementById('itemCategory').value
             };
             
-            if (newItem.title) {
+            if (newItem.title && newItem.category) {
                 addWishItem(newItem);
                 this.reset();
+            } else if (!newItem.category) {
+                alert('Por favor, selecione uma categoria!');
             }
         });
 
@@ -615,6 +856,11 @@
                 closeModal();
             }
         });
+
+        // Event listeners para filtros em tempo real
+        document.getElementById('searchInput').addEventListener('input', applyFilters);
+        document.getElementById('categoryFilter').addEventListener('change', applyFilters);
+        document.getElementById('statusFilter').addEventListener('change', applyFilters);
 
         // Carregar a lista quando a página carregar
         document.addEventListener('DOMContentLoaded', loadWishlistFromSupabase);
